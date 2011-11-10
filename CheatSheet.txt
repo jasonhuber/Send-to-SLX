@@ -1,0 +1,186 @@
+		<h2>Insert a Ticket</h2>
+			<div id="accounts"></div>
+	<div id="contacts"></div>
+	<div id="status"></div>
+	<div><textarea id="txtNotes"></textarea></div>
+	<div><input type="button" id="Insert Ticket" onclick="submitTicket();" value="Insert Ticket" /></div>
+	
+	
+		var service;
+	
+    dojo.ready(function() {
+		//first let's get the service defined.
+		service = new Sage.SData.Client.SDataService({
+		serverName: 'localhost',
+		virtualDirectory: 'sdata',
+        applicationName: 'slx',
+        contractName: 'dynamic',
+        port: 3333,
+		userName: 'admin',
+		password: 'll@@kers123'
+        });
+	   
+	   service.enableJson();
+	   
+	   //GetAccounts();
+		//GetTicketStatus();
+   });
+
+	//get all the accounts in a dropdown.
+	function GetAccounts()
+	{
+		   var request = new Sage.SData.Client.SDataResourceCollectionRequest(service)
+            .setResourceKind('Accounts');
+			/*request.setQueryArgs({
+            'where': "Address.City like '%Chicago%'",
+			'include': "Owner"
+			}); */
+			
+		var success = function(feed)
+		{
+			debugger;
+			//alert("it worked!");
+			var options = RML.option({selected:'true',value:'', content:''});
+			for (var i = 0; i < feed.$resources.length; i++)
+            {
+                var entry = feed.$resources[i];
+				//alert(entry.AccountName);
+				//an html combo box is a select tag with many options inside.
+				//the first (blank) option was set above the loop.
+				//These options are added to a select after the loop.
+				options += RML.option({value:entry.$key, content:entry.AccountName});
+            }
+			//now take the options and put the into a select. I know. Why cbo? cause I like it.
+			dojo.byId("accounts").innerHTML = "Account: <br />" + RML.select({content:options, id:'cboAccounts', onchange:'GetContacts()'});
+		}
+		var failure = function(feed)
+		{
+			alert("There was a failure!");
+		}
+		request.read({
+            success: success,
+            failure: failure
+        });
+	}
+
+
+	
+	function GetContacts()
+	{
+			dojo.byId("contacts").innerHTML = "";
+			if (dojo.byId("cboAccounts").value.length == 0 )
+			{
+				return false;
+			}
+		   var request = new Sage.SData.Client.SDataResourceCollectionRequest(service);
+            request.setResourceKind('Contacts');
+			request.setQueryArgs({
+                'where': "Account.Id eq '" + dojo.byId("cboAccounts").value + "'"});
+
+		var success = function(feed)
+		{
+			var options = RML.option({selected:'true',value:'', content:''});
+			for (var i = 0; i < feed.$resources.length; i++)
+            {
+                var entry = feed.$resources[i];
+				options += RML.option({value:entry.$key, content:entry.Name});
+            }
+			//now take the options and put the into a select. I know. Why cbo? cause I like it.
+			dojo.byId("contacts").innerHTML = "Contact: <br />" + RML.select({content:options, id:'cboContacts'});
+		}
+		var failure = function(feed)
+		{
+			alert("There was a failure!");
+		}
+	
+		request.read({
+            success: success,
+            failure: failure
+        });
+
+	}
+ 
+	function GetTicketStatus()
+	{
+	var service;
+		//example of a system contract name:
+		//first let's get the service defined.
+		service = new Sage.SData.Client.SDataService({
+		serverName: 'localhost',
+		virtualDirectory: 'sdata',
+        applicationName: 'slx',
+        contractName: 'system',
+        port: 3333,
+		userName: 'admin',
+		password: 'll@@kers123'
+        });
+	   
+	   service.enableJson();
+	   
+		   var request = new Sage.SData.Client.SDataResourceCollectionRequest(service)
+            .setResourceKind('pickLists');
+			request.setQueryArgs({
+            'where': "name eq 'Ticket Status'",
+			'include': "items"
+			}); 
+			
+		var success = function(feed)
+		{
+			//debugger;
+			//alert("it worked!");
+			var options = RML.option({selected:'true',value:'', content:''});
+			for (var i = 0; i < feed.$resources[0].items.$resources.length; i++)
+            {
+                var entry = feed.$resources[0].items.$resources[i];
+				//alert(entry.AccountName);
+				//an html combo box is a select tag with many options inside.
+				//the first (blank) option was set above the loop.
+				//These options are added to a select after the loop.
+				options += RML.option({value:entry.$key, content:entry.text});
+            }
+			//now take the options and put the into a select. I know. Why cbo? cause I like it.
+			dojo.byId("status").innerHTML = "Status: <br />" + RML.select({content:options, id:'cboStatus'});
+		}
+		var failure = function(feed)
+		{
+			alert("There was a failure!");
+		}
+		request.read({
+            success: success,
+            failure: failure
+        });
+	}
+
+ 	
+	function submitTicket()
+	{
+		  var request = new Sage.SData.Client.SDataSingleResourceRequest(service);
+            request.setResourceKind('Tickets');
+			
+			var entry = {
+				'$name':'Ticket', 
+				'Account':{'$name':'Account','$key':dojo.byId("cboAccounts").value},
+				'Contact':{'$name':'Contact','$key':dojo.byId("cboContacts").value},
+				'StatusCode':dojo.byId("status").value,
+				'TicketProblem':{'$name:':'TicketProblem','Notes':dojo.byId("txtNotes").value}
+				};
+				
+			var success = function(feed)
+		{
+				//debugger;
+				alert("Ticket Created!");
+		}
+		var failure = function(feed)
+		{
+			//debugger;
+			alert(feed.responseText);
+		}
+	
+		//create instead of read here
+		//and we need to pass in the entry from above.
+		request.create(entry, {
+            success: success,
+            failure: failure
+        });
+
+	}

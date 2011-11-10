@@ -1,0 +1,12 @@
+{
+  "name": "Send to SLX",
+  "version": "0.1",
+  "description": "This extension should allow you to send a note to SLX.",
+  "browser_action": {
+    "default_icon": "slx.jpg",
+	"popup": "default.htm"
+  },
+  "permissions": [
+    "http://www.gmail.com"
+  ]
+}
