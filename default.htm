@@ -57,71 +57,25 @@
         port: 80,
 		userName: 'admin'
         });
-	   
+	  
 	   service.enableJson();
-	   
-	GetAccounts();
-	GetTicketStatus();
    });   
 
-   function GetAccounts()
+
+   function GetContacts(email)
    {
-		var request = new Sage.SData.Client.SDataResourceCollectionRequest(service)
-            .setResourceKind('Accounts');
-			/*request.setQueryArgs({
-            'where': "Address.City like '%Chicago%'",
-			'include': "Owner"
-			}); */
 			
-		var success = function(feed)
-		{
-			//debugger;
-			//alert("it worked!");
-			var options = RML.option({selected:'true',value:'', content:''});
-			for (var i = 0; i < feed.$resources.length; i++)
-            {
-                var entry = feed.$resources[i];
-				//alert(entry.AccountName);
-				//an html combo box is a select tag with many options inside.
-				//the first (blank) option was set above the loop.
-				//These options are added to a select after the loop.
-				options += RML.option({value:entry.$key, content:entry.AccountName});
-            }
-			//now take the options and put the into a select. I know. Why cbo? cause I like it.
-			dojo.byId("accounts").innerHTML = "Account: <br />" + RML.select({content:options, id:'cboAccounts', onchange:'GetContacts()'});
-		}
-		var failure = function(feed)
-		{
-			alert("There was a failure!");
-		}
-		request.read({
-            success: success,
-            failure: failure
-        });
-   }
-   
-   function GetContacts()
-   {
-			dojo.byId("contacts").innerHTML = "";
-			if (dojo.byId("cboAccounts").value.length == 0 )
-			{
-				return false;
-			}
+			dojo.byId("contacts").innerHTML = "JASON3";
 		   var request = new Sage.SData.Client.SDataResourceCollectionRequest(service);
             request.setResourceKind('Contacts');
-			request.setQueryArgs({
-                'where': "Account.Id eq '" + dojo.byId("cboAccounts").value + "'"});
-
-			
+			request.setQueryArgs({'where': "Email eq '" + email + "'"});
 		var success = function(feed)
 		{
-			//debugger;
-			//alert("it worked!");
-			var options = RML.option({selected:'true',value:'', content:''});
+			
+			var options = "";
 			for (var i = 0; i < feed.$resources.length; i++)
             {
                 var entry = feed.$resources[i];
-				//alert(entry.AccountName);
 				//an html combo box is a select tag with many options inside.
 				//the first (blank) option was set above the loop.
 				//These options are added to a select after the loop.
@@ -134,65 +88,29 @@
 		{
 			alert("There was a failure!");
 		}
+		 
 		request.read({
             success: success,
             failure: failure
         });
    }
    
- //get all the ticket statuses in a dropdown.
-	function GetTicketStatus()
+
+	
+	function GetEmail(tabId)
 	{
-		var service;
-		//example of a system contract name:
-		//first let's get the service defined.
-		service = new Sage.SData.Client.SDataService({
-		serverName: '50.16.242.109',
-		virtualDirectory: 'sdata',
-        applicationName: 'slx',
-        contractName: 'system',
-        port: 80,
-		userName: 'admin'
-        });
-	   
-	   service.enableJson();
-	   
-	   var request = new Sage.SData.Client.SDataResourceCollectionRequest(service)
-		.setResourceKind('pickLists');
-		request.setQueryArgs({
-		'where': "name eq 'Ticket Status'",
-		'include': "items"
-		}); 
-			
-		var success = function(feed)
-		{
-			//debugger;
-			//alert("it worked!");
-			var options = RML.option({selected:'true',value:'', content:''});
-			for (var i = 0; i < feed.$resources[0].items.$resources.length; i++)
-            {
-                var entry = feed.$resources[0].items.$resources[i];
-				//alert(entry.AccountName);
-				//an html combo box is a select tag with many options inside.
-				//the first (blank) option was set above the loop.
-				//These options are added to a select after the loop.
-				options += RML.option({value:entry.$key, content:entry.text});
-            }
-			//now take the options and put the into a select. I know. Why cbo? cause I like it.
-			dojo.byId("status").innerHTML = "Status: <br />" + RML.select({content:options, id:'cboStatus'});
-		}
-		var failure = function(feed)
-		{
-			alert("There was a failure!");
-		}
-		request.read({
-            success: success,
-            failure: failure
-        });
+		chrome.tabs.sendRequest(tabId, {}, function(response) {
+		alert(response.substr(0,response.length-1));
+ 			GetContacts(response.substr(0,response.length-1));
+  });
 	}
 	
-	function submitTicket()
+	
+function submitTicket()
 	{
+	
+
+	/*
 		  var request = new Sage.SData.Client.SDataSingleResourceRequest(service);
             request.setResourceKind('Tickets');
 			
@@ -221,8 +139,14 @@
             success: success,
             failure: failure
         });
+		*/
 
 	}
+	chrome.tabs.getSelected(null, function(tab) {
+		//call the code inside the page to get the email in the div below TO
+		//then go and get the contact for that email....
+		GetEmail(tab.id);
+});
 </script>
 <link rel="stylesheet" type="text/css" href="./files/style_main-2011.css">
 <style type="text/css" media="all">
@@ -260,33 +184,16 @@
 </head>
 <body>
 <div id="wrapper">
-	<div id="header">
-		<div id="top_right_nav">
-			<ul>
-				<li id="tn_home"><span class="grayRule"><a class="top_link" href="http://www.sagesaleslogixbootcamp.com/default.aspx" title="Conference Home"></a></span></li>
-				<li id="tn_contact"><span class="grayRule"><a class="top_link" href="mailto:saleslogixbootcamp@sage.com" title="Contact Us"></a></span></li>
-			</ul>
-		</div>
-<!--		<div id="header_bar"></div> -->
-    <div id="headerContainer">
-<!--    	<div id="mainLogoContainer"><a href="default.aspx"><img src="../images/simply_partnership_logo.jpg" alt="Simply Partnership 2009" width="173" height="89" border="0" /></a></div> -->
-        <div id="headerContent">
-					<p>Conference: November 6–10, 2011</p>
-					<p><a href="http://www.thescottsdaleresort.com/" target="_blank" title="http://www.thescottsdaleresort.com/">Scottsdale Resort &amp; Conference Center</a></p>
-        </div>
-    </div>
-	</div><!-- End header -->
 	<div id="main">
 		<div id="content-wrapper">
 			<div id="content">
 			<!-- put all your html code pieces here -->
 <div id="inserttickets">
-	<h2>Insert a Ticket</h2>
-			<div id="accounts"></div>
+	<h2>Send to SLX</h2>
+			
 			<div id="contacts"></div>
-			<div id="status"></div>
-				<div><textarea id="txtNotes"></textarea></div>
-	<div><input type="button" id="Insert Ticket" onclick="submitTicket();" value="Insert Ticket" /></div>
+				
+	<div><input type="button" id="Send!" onclick="SendtoSLX();" value="Send to SLX" /></div>
 
 </div>
 	</div>

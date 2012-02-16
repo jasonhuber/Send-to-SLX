@@ -6,7 +6,16 @@
     "default_icon": "slx.jpg",
 	"popup": "default.htm"
   },
+   "content_scripts": [
+	{ "all_frames": true, "matches": ["https://mail.google.com/*"], "js": ["jquery-1.7.min.js"],
+      "run_at": "document_start" },
+    { "all_frames": true, "matches": ["https://mail.google.com/*"], "js": ["content_script.js"],
+      "run_at": "document_start" }
+
+  ],
   "permissions": [
-    "http://www.gmail.com"
+    "https://mail.google.com/*",
+	"tabs", 
+	"http://50.16.242.109/*"
   ]
 }
