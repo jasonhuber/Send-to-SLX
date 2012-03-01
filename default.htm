@@ -100,32 +100,39 @@
 	function GetEmail(tabId)
 	{
 		chrome.tabs.sendRequest(tabId, {}, function(response) {
-		alert(response.substr(0,response.length-1));
- 			GetContacts(response.substr(0,response.length-1));
-  });
+		//alert(response.substr(0,response.length-1));
+		//I probably should split this..
+			var email = response.substr(0,response.indexOf("~")-1);
+			
+			//alert(email);
+		GetContacts(email);
+		dojo.byId("Notes").innerHTML = response.substr(response.indexOf("~")+1); 
+		});
+		
 	}
 	
 	
-function submitTicket()
+	function SendtoSLX()
 	{
 	
-
-	/*
 		  var request = new Sage.SData.Client.SDataSingleResourceRequest(service);
-            request.setResourceKind('Tickets');
+            request.setResourceKind('History');
+			
+			
 			
 			var entry = {
-				'$name':'Ticket', 
-				'Account':{'$name':'Account','$key':dojo.byId("cboAccounts").value},
-				'Contact':{'$name':'Contact','$key':dojo.byId("cboContacts").value},
-				'StatusCode':dojo.byId("status").value,
-				'TicketProblem':{'$name:':'TicketProblem','Notes':dojo.byId("txtNotes").value}
+				'$name':'History', 
+				'ContactId':dojo.byId("cboContacts").value,
+				'LongNotes':dojo.byId("Notes").innerHTML,
+				'Notes':'Email pulled from Gmail.',
+				'Type':'atEmail',
+				'Description':'Email pulled from Gmail.'
 				};
 			
 		var success = function(feed)
-		{
+		{	
 				//debugger;
-				alert("Ticket Created!");
+				alert("History Created!");
 		}
 		var failure = function(feed)
 		{
@@ -139,9 +146,10 @@ function submitTicket()
             success: success,
             failure: failure
         });
-		*/
+		
 
 	}
+	
 	chrome.tabs.getSelected(null, function(tab) {
 		//call the code inside the page to get the email in the div below TO
 		//then go and get the contact for that email....
@@ -192,7 +200,7 @@ function submitTicket()
 	<h2>Send to SLX</h2>
 			
 			<div id="contacts"></div>
-				
+			<div id="Notes"></div>
 	<div><input type="button" id="Send!" onclick="SendtoSLX();" value="Send to SLX" /></div>
 
 </div>

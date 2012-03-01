@@ -4,8 +4,14 @@ if (window == top) {
   //need to go and get the page here..., subject and body etc...
  
  //$('a').css({'background-color': 'yellow'});
- var ifr = $('[name="to"]', $($("#canvas_frame")[0].contentDocument));
- sendResponse(ifr.parent().children()[1].innerHTML);
+ 
+ var $canvasframe = $($("#canvas_frame")[0].contentDocument);
+ 
+ 
+ var ifr = $('[name="to"]', $canvasframe);
+ var gmailquote = $($canvasframe.find('iframe')[1].contentDocument).find('div.gmail_quote')[0];
+ 
+ sendResponse(ifr.parent().children()[1].innerHTML + "~" + gmailquote.innerHTML);
  //document.getElementsByName("to")[0].nextSibling.innerHTML
   });
   }
